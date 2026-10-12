@@ -1,0 +1,34 @@
+Hãy phân tích requirement dưới đây và tạo bản nháp testcase.
+
+Yêu cầu đầu ra là một JSON object đúng cấu trúc:
+{
+  "test_cases": [
+    {
+      "test_case_id": "TC-<FEATURE>-001",
+      "requirement_ref": "AC ID hoặc mô tả ngắn có thể truy vết",
+      "title": "Tên testcase ngắn, nêu rõ điều kiện/hành vi",
+      "priority": "P0 | P1 | P2 | P3",
+      "test_type": "Functional | Negative | Boundary | Security | Permission | ...",
+      "preconditions": "Điều kiện cần có trước khi chạy",
+      "test_data": "Dữ liệu giả lập cần dùng",
+      "steps": ["Bước 1", "Bước 2"],
+      "expected_result": "Kết quả quan sát được và có thể kiểm chứng",
+      "needs_clarification": false,
+      "clarification_question": "Chuỗi rỗng nếu không cần làm rõ"
+    }
+  ],
+  "requirement_gaps": ["Câu hỏi cần product/BA xác nhận"],
+  "assumptions": ["Giả định dùng để tạo testcase; phải được QA xác nhận"]
+}
+
+Quy tắc thêm:
+- Dùng ID AC có sẵn nếu có; nếu không, dùng đoạn requirement ngắn để truy vết, không bịa ID nguồn.
+- Mỗi testcase nên kiểm tra một mục tiêu chính.
+- Expected result không được khẳng định điều requirement chưa định nghĩa. Nếu thiếu, nêu rõ cần xác nhận và đặt needs_clarification=true.
+- Tạo testcase cho luồng thành công, lỗi, giá trị biên và quyền hạn khi có cơ sở trong requirement.
+- Không tạo testcase giả định về browser, API status code, rate limit hoặc policy nếu tài liệu không đề cập.
+- Nếu requirement thiếu giới hạn/ràng buộc, ghi câu hỏi cụ thể trong requirement_gaps.
+- Không trả về markdown hoặc text bên ngoài JSON.
+
+Requirement:
+{text}
