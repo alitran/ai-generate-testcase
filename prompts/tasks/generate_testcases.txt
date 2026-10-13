@@ -1,4 +1,4 @@
-Hãy phân tích requirement dưới đây và tạo bản nháp testcase.
+Hãy phân tích requirement dưới đây và tạo testcase.
 
 Yêu cầu đầu ra là một JSON object đúng cấu trúc:
 {
