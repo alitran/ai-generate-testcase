@@ -9,6 +9,7 @@ PROVIDER_MODEL_ENV = {
     "anthropic": "ANTHROPIC_MODEL",
     "gemini": "GEMINI_MODEL",
     "openai_compatible": "OPENAI_COMPATIBLE_MODEL",
+    "demo": "DEMO_MODEL",
 }
 SUPPORTED_PROVIDERS = tuple(PROVIDER_MODEL_ENV)
 
@@ -20,6 +21,9 @@ def resolve_model(provider: str, explicit_model: str | None = None) -> str:
         raise ValueError(
             f"Provider '{provider}' không được hỗ trợ. Chọn một trong: {', '.join(SUPPORTED_PROVIDERS)}"
         )
+    if provider == "demo":
+        # Deterministic fixture provider; intentionally works without a model/API key.
+        return (explicit_model or "fixture-v1").strip()
     model = (explicit_model or os.getenv("AI_MODEL") or os.getenv(PROVIDER_MODEL_ENV[provider], "")).strip()
     if not model or model.lower().startswith(("your_", "replace_", "put_")):
         raise ValueError(
@@ -44,6 +48,9 @@ def build_provider(name: str, *, client: Any | None = None):
     if provider == "openai_compatible":
         from .openai_compatible_provider import OpenAICompatibleProvider
         return OpenAICompatibleProvider(client=client)
+    if provider == "demo":
+        from .demo_provider import DemoProvider
+        return DemoProvider()
     raise ValueError(
         f"Provider '{provider}' không được hỗ trợ. Chọn một trong: {', '.join(SUPPORTED_PROVIDERS)}"
     )
