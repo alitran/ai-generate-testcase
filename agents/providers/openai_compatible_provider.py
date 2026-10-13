@@ -22,14 +22,20 @@ class OpenAICompatibleProvider:
         self.client = client
 
     def generate(self, *, system_prompt: str, user_input: str, model: str) -> str:
-        response = self.client.chat.completions.create(
-            model=model,
-            temperature=0,
-            messages=[
+        request = {
+            "model": model,
+            "temperature": 0,
+            "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input},
             ],
-        )
+        }
+        # Ollama supports JSON mode through its OpenAI-compatible API.
+        # Disable with OPENAI_COMPATIBLE_JSON_MODE=false for endpoints that do not support it.
+        json_mode = os.getenv("OPENAI_COMPATIBLE_JSON_MODE", "true").strip().lower()
+        if json_mode in {"1", "true", "yes", "on"}:
+            request["response_format"] = {"type": "json_object"}
+        response = self.client.chat.completions.create(**request)
         choices = getattr(response, "choices", None) or []
         output = choices[0].message.content if choices else None
         if not isinstance(output, str) or not output.strip():

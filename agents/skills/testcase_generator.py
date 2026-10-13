@@ -20,14 +20,40 @@ def build_generation_input(task_template: str, requirement_text: str) -> str:
 
 
 def parse_json_report(output_text: str) -> dict[str, Any]:
-    text = output_text.strip()
+    text = (output_text or "").strip().lstrip("\ufeff").strip()
+    if not text:
+        raise ValueError(
+            "Model trả về nội dung rỗng. Hãy kiểm tra model Ollama, context/token limit "
+            "và nội dung response của provider."
+        )
+
+    # Remove a surrounding Markdown code fence when the model adds one.
     if text.startswith("```"):
         text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.IGNORECASE)
         text = re.sub(r"\s*```$", "", text)
+
     try:
         report = json.loads(text)
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"Model không trả về JSON hợp lệ: {exc}") from exc
+    except json.JSONDecodeError as original_error:
+        # Some local models prepend a short sentence or reasoning text. Try to
+        # decode the first JSON object, then still apply strict schema validation.
+        start = text.find("{")
+        if start >= 0:
+            try:
+                report, _ = json.JSONDecoder().raw_decode(text[start:])
+            except json.JSONDecodeError:
+                preview = repr(text[:300])
+                raise ValueError(
+                    "Model không trả về JSON hợp lệ. Phản hồi bắt đầu bằng: "
+                    f"{preview}. Hãy bật JSON mode hoặc kiểm tra model/prompt."
+                ) from original_error
+        else:
+            preview = repr(text[:300])
+            raise ValueError(
+                "Model không trả về JSON object. Phản hồi bắt đầu bằng: "
+                f"{preview}. Hãy bật JSON mode hoặc kiểm tra model/prompt."
+            ) from original_error
+
     validate_report(report)
     return report
 
